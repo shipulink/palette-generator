@@ -25,6 +25,29 @@ body {
   justify-content: center;
 }
 
+.palette-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#palette-labels {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  column-gap: 10px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+#palette-labels span {
+  height: calc(75dvh / 17);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
 #palette {
   width: 15vw;
   border-radius: 12px;

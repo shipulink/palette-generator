@@ -6,6 +6,7 @@ const rInput = document.getElementById('r-input');
 const gInput = document.getElementById('g-input');
 const bInput = document.getElementById('b-input');
 const paletteEl = document.getElementById('palette');
+const labelsEl = document.getElementById('palette-labels');
 
 let colorPicker = null;
 let syncing = false;
@@ -44,8 +45,18 @@ const MIDDLE = 3;
 const MIN_MIX = 0.25; // how close top/bottom get to white/black
 
 let kebabDots = null;
+const labelCells = []; // [{hex, r, g, b}]
 
 const swatches = Array.from({ length: SWATCH_COUNT }, (_, i) => {
+  // Label cells (hex | R | G | B)
+  const hexCell = document.createElement('span');
+  const rCell   = document.createElement('span');
+  const gCell   = document.createElement('span');
+  const bCell   = document.createElement('span');
+  [hexCell, rCell, gCell, bCell].forEach(el => labelsEl.appendChild(el));
+  labelCells.push({ hex: hexCell, r: rCell, g: gCell, b: bCell });
+
+  // Swatch
   const div = document.createElement('div');
   div.className = 'swatch' + (i === MIDDLE ? ' swatch-middle' : '');
   if (i === MIDDLE) {
@@ -81,6 +92,13 @@ function updatePalette(r, g, b) {
       cb = Math.round(b * t);
     }
     swatches[i].style.background = `rgb(${cr},${cg},${cb})`;
+
+    const cells = labelCells[i];
+    cells.hex.textContent = rgbToHex(cr, cg, cb).slice(1).toUpperCase();
+    cells.r.textContent = cr;
+    cells.g.textContent = cg;
+    cells.b.textContent = cb;
+
     if (i === MIDDLE && kebabDots) {
       const luma = (0.299 * cr + 0.587 * cg + 0.114 * cb) / 255;
       kebabDots.querySelector('svg').style.fill = luma > 0.45 ? '#000' : '#fff';
