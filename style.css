@@ -88,6 +88,59 @@ body {
   filter: brightness(1.15);
 }
 
+/* ── Palette controls ── */
+
+#palette-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  height: calc(7 * 75dvh / 17);
+  padding-left: 8px;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.vslider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Fixed-size box that holds the visual space of the vertical slider */
+.vslider-track {
+  width: 28px;
+  height: 150px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Horizontal input, rotated into vertical position */
+.vslider-track input[type="range"] {
+  position: absolute;
+  width: 150px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  transform: rotate(-90deg);
+  cursor: pointer;
+  accent-color: #6366f1;
+}
+
+.vslider label {
+  font-size: 10px;
+  color: #6b7280;
+  letter-spacing: 0.05em;
+}
+
 /* ── Modal ── */
 
 .modal {

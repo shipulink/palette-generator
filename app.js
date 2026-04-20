@@ -7,6 +7,12 @@ const gInput = document.getElementById('g-input');
 const bInput = document.getElementById('b-input');
 const paletteEl = document.getElementById('palette');
 const labelsEl = document.getElementById('palette-labels');
+const topHSlider = document.getElementById('top-h');
+const topSSlider = document.getElementById('top-s');
+const topVSlider = document.getElementById('top-v');
+const botHSlider = document.getElementById('bot-h');
+const botSSlider = document.getElementById('bot-s');
+const botVSlider = document.getElementById('bot-v');
 
 let colorPicker = null;
 let syncing = false;
@@ -25,30 +31,73 @@ function hsvToRgb(h, s, v) {
   return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
 }
 
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d > 0) {
+    if (max === r)      h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else                h = (r - g) / d + 4;
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+  }
+  return {
+    h,
+    s: max === 0 ? 0 : Math.round((d / max) * 100),
+    v: Math.round(max * 100),
+  };
+}
+
 function rgbToHex(r, g, b) {
   return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
 function randomBaseColor() {
   const h = Math.random() * 360;
-  const s = 0.55 + Math.random() * 0.45; // 55–100%: well saturated
-  const v = 0.4  + Math.random() * 0.45; // 40–85%:  not too dark or bright
+  const s = 0.55 + Math.random() * 0.45;
+  const v = 0.4  + Math.random() * 0.45;
   return hsvToRgb(h, s, v);
 }
 
-const BASE = randomBaseColor();
+// ── State ─────────────────────────────────────────────────
 
-// ── Palette ──────────────────────────────────────────────
+const BASE = randomBaseColor();
+let currentBase = { ...BASE };
 
 const SWATCH_COUNT = 7;
 const MIDDLE = 3;
-const MIN_MIX = 0.25; // how close top/bottom get to white/black
+const MIN_MIX = 0.25;
+
+let topHSV = { h: 0, s: 0, v: 100 };
+let botHSV = { h: 0, s: 0, v: 0 };
+
+function resetEndColors(r, g, b) {
+  const tr = Math.round(r * MIN_MIX + 255 * (1 - MIN_MIX));
+  const tg = Math.round(g * MIN_MIX + 255 * (1 - MIN_MIX));
+  const tb = Math.round(b * MIN_MIX + 255 * (1 - MIN_MIX));
+  topHSV = rgbToHsv(tr, tg, tb);
+  topHSlider.value = topHSV.h;
+  topSSlider.value = topHSV.s;
+  topVSlider.value = topHSV.v;
+
+  const br = Math.round(r * MIN_MIX);
+  const bg = Math.round(g * MIN_MIX);
+  const bb = Math.round(b * MIN_MIX);
+  botHSV = rgbToHsv(br, bg, bb);
+  botHSlider.value = botHSV.h;
+  botSSlider.value = botHSV.s;
+  botVSlider.value = botHSV.v;
+}
+
+// ── Palette ──────────────────────────────────────────────
 
 let kebabDots = null;
-const labelCells = []; // [{hex, r, g, b}]
+const labelCells = [];
 
 const swatches = Array.from({ length: SWATCH_COUNT }, (_, i) => {
-  // Label cells (hex | R | G | B)
   const hexCell = document.createElement('span');
   const rCell   = document.createElement('span');
   const gCell   = document.createElement('span');
@@ -56,7 +105,6 @@ const swatches = Array.from({ length: SWATCH_COUNT }, (_, i) => {
   [hexCell, rCell, gCell, bCell].forEach(el => labelsEl.appendChild(el));
   labelCells.push({ hex: hexCell, r: rCell, g: gCell, b: bCell });
 
-  // Swatch
   const div = document.createElement('div');
   div.className = 'swatch' + (i === MIDDLE ? ' swatch-middle' : '');
   if (i === MIDDLE) {
@@ -76,20 +124,21 @@ const swatches = Array.from({ length: SWATCH_COUNT }, (_, i) => {
 });
 
 function updatePalette(r, g, b) {
+  const topRGB = hsvToRgb(topHSV.h, topHSV.s / 100, topHSV.v / 100);
+  const botRGB = hsvToRgb(botHSV.h, botHSV.s / 100, botHSV.v / 100);
+
   for (let i = 0; i < SWATCH_COUNT; i++) {
     let cr, cg, cb;
     if (i <= MIDDLE) {
-      // Tint: blend toward white
-      const t = MIN_MIX + (1 - MIN_MIX) * (i / MIDDLE);
-      cr = Math.round(r * t + 255 * (1 - t));
-      cg = Math.round(g * t + 255 * (1 - t));
-      cb = Math.round(b * t + 255 * (1 - t));
+      const t = i / MIDDLE; // 0 = top color, 1 = base color
+      cr = Math.round(topRGB.r * (1 - t) + r * t);
+      cg = Math.round(topRGB.g * (1 - t) + g * t);
+      cb = Math.round(topRGB.b * (1 - t) + b * t);
     } else {
-      // Shade: blend toward black
-      const t = 1 - (1 - MIN_MIX) * ((i - MIDDLE) / (SWATCH_COUNT - 1 - MIDDLE));
-      cr = Math.round(r * t);
-      cg = Math.round(g * t);
-      cb = Math.round(b * t);
+      const t = (i - MIDDLE) / (SWATCH_COUNT - 1 - MIDDLE); // 0 = base, 1 = bottom
+      cr = Math.round(r * (1 - t) + botRGB.r * t);
+      cg = Math.round(g * (1 - t) + botRGB.g * t);
+      cb = Math.round(b * (1 - t) + botRGB.b * t);
     }
     swatches[i].style.background = `rgb(${cr},${cg},${cb})`;
 
@@ -106,7 +155,24 @@ function updatePalette(r, g, b) {
   }
 }
 
+resetEndColors(BASE.r, BASE.g, BASE.b);
 updatePalette(BASE.r, BASE.g, BASE.b);
+
+// ── End-color slider events ───────────────────────────────
+
+[topHSlider, topSSlider, topVSlider].forEach(el => {
+  el.addEventListener('input', () => {
+    topHSV = { h: +topHSlider.value, s: +topSSlider.value, v: +topVSlider.value };
+    updatePalette(currentBase.r, currentBase.g, currentBase.b);
+  });
+});
+
+[botHSlider, botSSlider, botVSlider].forEach(el => {
+  el.addEventListener('input', () => {
+    botHSV = { h: +botHSlider.value, s: +botSSlider.value, v: +botVSlider.value };
+    updatePalette(currentBase.r, currentBase.g, currentBase.b);
+  });
+});
 
 // ── Modal ─────────────────────────────────────────────────
 
@@ -134,6 +200,8 @@ function initColorPicker() {
   colorPicker.on('color:change', (color) => {
     if (syncing) return;
     syncing = true;
+    currentBase = { r: color.rgb.r, g: color.rgb.g, b: color.rgb.b };
+    resetEndColors(color.rgb.r, color.rgb.g, color.rgb.b);
     colorPreview.style.background = color.hexString;
     hexInput.value = color.hexString.slice(1).toUpperCase();
     rInput.value = color.rgb.r;
@@ -171,11 +239,14 @@ hexInput.addEventListener('input', () => {
   if (clean.length === 6 && !syncing && colorPicker) {
     syncing = true;
     colorPicker.color.hexString = '#' + clean;
+    const { r, g, b } = colorPicker.color.rgb;
+    currentBase = { r, g, b };
+    resetEndColors(r, g, b);
     colorPreview.style.background = '#' + clean;
-    rInput.value = colorPicker.color.rgb.r;
-    gInput.value = colorPicker.color.rgb.g;
-    bInput.value = colorPicker.color.rgb.b;
-    updatePalette(colorPicker.color.rgb.r, colorPicker.color.rgb.g, colorPicker.color.rgb.b);
+    rInput.value = r;
+    gInput.value = g;
+    bInput.value = b;
+    updatePalette(r, g, b);
     syncing = false;
   }
 });
@@ -189,6 +260,8 @@ function syncFromRGB() {
   const b = clamp(parseInt(bInput.value) || 0, 0, 255);
   syncing = true;
   colorPicker.color.rgb = { r, g, b };
+  currentBase = { r, g, b };
+  resetEndColors(r, g, b);
   colorPreview.style.background = colorPicker.color.hexString;
   hexInput.value = colorPicker.color.hexString.slice(1).toUpperCase();
   updatePalette(r, g, b);
