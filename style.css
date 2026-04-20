@@ -16,7 +16,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Main screen ── */
+/* ── Layout ── */
+
+:root {
+  --step-h: 30px;
+  --step-gap: 6px;
+  --swatch-h: calc(75dvh / 17);
+}
 
 .app {
   min-height: 100dvh;
@@ -31,6 +37,42 @@ body {
   gap: 12px;
 }
 
+.palette-with-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--step-gap);
+}
+
+.palette-main {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* ── Step controls ── */
+
+.step-controls {
+  display: flex;
+  gap: 4px;
+  height: var(--step-h);
+}
+
+.step-btn {
+  flex: 1;
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #e5e5e5;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.step-btn:hover  { background: #1f2937; }
+.step-btn:active { background: #374151; }
+
+/* ── Palette labels ── */
+
 #palette-labels {
   display: grid;
   grid-template-columns: auto auto auto auto;
@@ -41,12 +83,14 @@ body {
 }
 
 #palette-labels span {
-  height: calc(75dvh / 17);
+  height: var(--swatch-h);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   white-space: nowrap;
 }
+
+/* ── Palette (swatch column) ── */
 
 #palette {
   width: 15vw;
@@ -59,11 +103,19 @@ body {
 
 .swatch {
   width: 100%;
-  height: calc(75dvh / 17);
+  height: var(--swatch-h);
   flex-shrink: 0;
   position: relative;
   transition: filter 0.1s ease;
   -webkit-tap-highlight-color: transparent;
+}
+
+.swatch-middle {
+  cursor: pointer;
+}
+
+.swatch-middle:active {
+  filter: brightness(1.15);
 }
 
 .swatch-kebab {
@@ -80,22 +132,17 @@ body {
   height: 4px;
 }
 
-.swatch-middle {
-  cursor: pointer;
-}
-
-.swatch-middle:active {
-  filter: brightness(1.15);
-}
-
-/* ── Palette controls ── */
+/* ── HSB slider controls ──
+   margin-top offsets past the top step-controls row so that
+   justify-content: center aligns sliders with the palette's centerline. */
 
 #palette-controls {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 8px;
-  height: calc(7 * 75dvh / 17);
+  /* height set dynamically in JS to match palette column height */
+  margin-top: calc(var(--step-h) + var(--step-gap));
   padding-left: 8px;
 }
 
@@ -113,7 +160,6 @@ body {
   gap: 6px;
 }
 
-/* Fixed-size box that holds the visual space of the vertical slider */
 .vslider-track {
   width: 28px;
   height: 150px;
@@ -123,7 +169,6 @@ body {
   justify-content: center;
 }
 
-/* Horizontal input, rotated into vertical position */
 .vslider-track input[type="range"] {
   position: absolute;
   width: 150px;
@@ -175,8 +220,6 @@ body {
   width: calc(100vw - 48px);
   max-width: 320px;
 }
-
-/* ── Color preview ── */
 
 #color-preview {
   width: 100%;

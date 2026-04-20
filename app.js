@@ -1,18 +1,19 @@
-const modal = document.getElementById('modal');
-const backdrop = document.getElementById('modal-backdrop');
-const colorPreview = document.getElementById('color-preview');
-const hexInput = document.getElementById('hex-input');
-const rInput = document.getElementById('r-input');
-const gInput = document.getElementById('g-input');
-const bInput = document.getElementById('b-input');
-const paletteEl = document.getElementById('palette');
-const labelsEl = document.getElementById('palette-labels');
-const topHSlider = document.getElementById('top-h');
-const topSSlider = document.getElementById('top-s');
-const topVSlider = document.getElementById('top-v');
-const botHSlider = document.getElementById('bot-h');
-const botSSlider = document.getElementById('bot-s');
-const botVSlider = document.getElementById('bot-v');
+const modal          = document.getElementById('modal');
+const backdrop       = document.getElementById('modal-backdrop');
+const colorPreview   = document.getElementById('color-preview');
+const hexInput       = document.getElementById('hex-input');
+const rInput         = document.getElementById('r-input');
+const gInput         = document.getElementById('g-input');
+const bInput         = document.getElementById('b-input');
+const paletteEl      = document.getElementById('palette');
+const labelsEl       = document.getElementById('palette-labels');
+const palControlsEl  = document.getElementById('palette-controls');
+const topHSlider     = document.getElementById('top-h');
+const topSSlider     = document.getElementById('top-s');
+const topVSlider     = document.getElementById('top-v');
+const botHSlider     = document.getElementById('bot-h');
+const botSSlider     = document.getElementById('bot-s');
+const botVSlider     = document.getElementById('bot-v');
 
 let colorPicker = null;
 let syncing = false;
@@ -33,22 +34,16 @@ function hsvToRgb(h, s, v) {
 
 function rgbToHsv(r, g, b) {
   r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const d = max - min;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
   let h = 0;
   if (d > 0) {
-    if (max === r)      h = ((g - b) / d) % 6;
+    if      (max === r) h = ((g - b) / d) % 6;
     else if (max === g) h = (b - r) / d + 2;
     else                h = (r - g) / d + 4;
     h = Math.round(h * 60);
     if (h < 0) h += 360;
   }
-  return {
-    h,
-    s: max === 0 ? 0 : Math.round((d / max) * 100),
-    v: Math.round(max * 100),
-  };
+  return { h, s: max === 0 ? 0 : Math.round((d / max) * 100), v: Math.round(max * 100) };
 }
 
 function rgbToHex(r, g, b) {
@@ -67,8 +62,8 @@ function randomBaseColor() {
 const BASE = randomBaseColor();
 let currentBase = { ...BASE };
 
-const SWATCH_COUNT = 7;
-const MIDDLE = 3;
+let topCount = 3;
+let botCount = 3;
 const MIN_MIX = 0.25;
 
 let topHSV = { h: 0, s: 0, v: 100 };
@@ -94,48 +89,67 @@ function resetEndColors(r, g, b) {
 
 // ── Palette ──────────────────────────────────────────────
 
-let kebabDots = null;
-const labelCells = [];
+let swatches   = [];
+let labelCells = [];
+let kebabDots  = null;
 
-const swatches = Array.from({ length: SWATCH_COUNT }, (_, i) => {
-  const hexCell = document.createElement('span');
-  const rCell   = document.createElement('span');
-  const gCell   = document.createElement('span');
-  const bCell   = document.createElement('span');
-  [hexCell, rCell, gCell, bCell].forEach(el => labelsEl.appendChild(el));
-  labelCells.push({ hex: hexCell, r: rCell, g: gCell, b: bCell });
+function rebuildPalette() {
+  paletteEl.innerHTML = '';
+  labelsEl.innerHTML  = '';
+  swatches   = [];
+  labelCells = [];
+  kebabDots  = null;
 
-  const div = document.createElement('div');
-  div.className = 'swatch' + (i === MIDDLE ? ' swatch-middle' : '');
-  if (i === MIDDLE) {
-    div.addEventListener('click', openModal);
-    kebabDots = document.createElement('div');
-    kebabDots.className = 'swatch-kebab';
-    kebabDots.innerHTML =
-      '<svg viewBox="0 0 20 4" xmlns="http://www.w3.org/2000/svg">' +
-      '<circle cx="2" cy="2" r="2"/>' +
-      '<circle cx="10" cy="2" r="2"/>' +
-      '<circle cx="18" cy="2" r="2"/>' +
-      '</svg>';
-    div.appendChild(kebabDots);
+  const count = topCount + 1 + botCount;
+  const mid   = topCount;
+
+  for (let i = 0; i < count; i++) {
+    const hexCell = document.createElement('span');
+    const rCell   = document.createElement('span');
+    const gCell   = document.createElement('span');
+    const bCell   = document.createElement('span');
+    [hexCell, rCell, gCell, bCell].forEach(el => labelsEl.appendChild(el));
+    labelCells.push({ hex: hexCell, r: rCell, g: gCell, b: bCell });
+
+    const div = document.createElement('div');
+    div.className = 'swatch' + (i === mid ? ' swatch-middle' : '');
+    if (i === mid) {
+      div.addEventListener('click', openModal);
+      kebabDots = document.createElement('div');
+      kebabDots.className = 'swatch-kebab';
+      kebabDots.innerHTML =
+        '<svg viewBox="0 0 20 4" xmlns="http://www.w3.org/2000/svg">' +
+        '<circle cx="2" cy="2" r="2"/>' +
+        '<circle cx="10" cy="2" r="2"/>' +
+        '<circle cx="18" cy="2" r="2"/>' +
+        '</svg>';
+      div.appendChild(kebabDots);
+    }
+    paletteEl.appendChild(div);
+    swatches.push(div);
   }
-  paletteEl.appendChild(div);
-  return div;
-});
+
+  // Keep HSB slider column same height as palette for centerline alignment
+  palControlsEl.style.height = `calc(${count} * 75dvh / 17)`;
+
+  updatePalette(currentBase.r, currentBase.g, currentBase.b);
+}
 
 function updatePalette(r, g, b) {
+  const count  = topCount + 1 + botCount;
+  const mid    = topCount;
   const topRGB = hsvToRgb(topHSV.h, topHSV.s / 100, topHSV.v / 100);
   const botRGB = hsvToRgb(botHSV.h, botHSV.s / 100, botHSV.v / 100);
 
-  for (let i = 0; i < SWATCH_COUNT; i++) {
+  for (let i = 0; i < count; i++) {
     let cr, cg, cb;
-    if (i <= MIDDLE) {
-      const t = i / MIDDLE; // 0 = top color, 1 = base color
+    if (i <= mid) {
+      const t = mid === 0 ? 1 : i / mid;
       cr = Math.round(topRGB.r * (1 - t) + r * t);
       cg = Math.round(topRGB.g * (1 - t) + g * t);
       cb = Math.round(topRGB.b * (1 - t) + b * t);
     } else {
-      const t = (i - MIDDLE) / (SWATCH_COUNT - 1 - MIDDLE); // 0 = base, 1 = bottom
+      const t = (i - mid) / (count - 1 - mid);
       cr = Math.round(r * (1 - t) + botRGB.r * t);
       cg = Math.round(g * (1 - t) + botRGB.g * t);
       cb = Math.round(b * (1 - t) + botRGB.b * t);
@@ -148,17 +162,26 @@ function updatePalette(r, g, b) {
     cells.g.textContent = cg;
     cells.b.textContent = cb;
 
-    if (i === MIDDLE && kebabDots) {
+    if (i === mid && kebabDots) {
       const luma = (0.299 * cr + 0.587 * cg + 0.114 * cb) / 255;
       kebabDots.querySelector('svg').style.fill = luma > 0.45 ? '#000' : '#fff';
     }
   }
 }
 
-resetEndColors(BASE.r, BASE.g, BASE.b);
-updatePalette(BASE.r, BASE.g, BASE.b);
+// ── Step buttons ─────────────────────────────────────────
 
-// ── End-color slider events ───────────────────────────────
+document.getElementById('top-plus') .addEventListener('click', () => { if (topCount < 8) { topCount++; rebuildPalette(); } });
+document.getElementById('top-minus').addEventListener('click', () => { if (topCount > 0) { topCount--; rebuildPalette(); } });
+document.getElementById('bot-plus') .addEventListener('click', () => { if (botCount < 8) { botCount++; rebuildPalette(); } });
+document.getElementById('bot-minus').addEventListener('click', () => { if (botCount > 0) { botCount--; rebuildPalette(); } });
+
+// ── Initialise ────────────────────────────────────────────
+
+resetEndColors(BASE.r, BASE.g, BASE.b);
+rebuildPalette();
+
+// ── HSB slider events ─────────────────────────────────────
 
 [topHSlider, topSSlider, topVSlider].forEach(el => {
   el.addEventListener('input', () => {
@@ -182,9 +205,7 @@ function clamp(val, min, max) {
 
 function initColorPicker() {
   if (colorPicker) return;
-
   const width = Math.min(260, window.innerWidth - 80);
-
   colorPicker = new iro.ColorPicker('#color-wheel-container', {
     width,
     color: rgbToHex(BASE.r, BASE.g, BASE.b),
@@ -233,7 +254,7 @@ backdrop.addEventListener('click', closeModal);
 // ── Hex input ─────────────────────────────────────────────
 
 hexInput.addEventListener('input', () => {
-  const raw = hexInput.value;
+  const raw   = hexInput.value;
   const clean = raw.replace(/[^0-9a-fA-F]/g, '').toUpperCase();
   if (clean !== raw) hexInput.value = clean;
   if (clean.length === 6 && !syncing && colorPicker) {
@@ -275,10 +296,8 @@ function syncFromRGB() {
     if (val !== input.value) input.value = val;
     syncFromRGB();
   });
-
   input.addEventListener('blur', () => {
-    const val = clamp(parseInt(input.value) || 0, 0, 255);
-    input.value = val;
+    input.value = clamp(parseInt(input.value) || 0, 0, 255);
     syncFromRGB();
   });
 });

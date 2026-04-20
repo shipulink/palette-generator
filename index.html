@@ -12,8 +12,22 @@
   <body>
     <main class="app">
       <div class="palette-area">
-        <div id="palette-labels"></div>
-        <div id="palette"></div>
+
+        <div class="palette-with-buttons">
+          <div class="step-controls">
+            <button class="step-btn" id="top-minus">−</button>
+            <button class="step-btn" id="top-plus">+</button>
+          </div>
+          <div class="palette-main">
+            <div id="palette-labels"></div>
+            <div id="palette"></div>
+          </div>
+          <div class="step-controls">
+            <button class="step-btn" id="bot-minus">−</button>
+            <button class="step-btn" id="bot-plus">+</button>
+          </div>
+        </div>
+
         <div id="palette-controls">
           <div class="slider-group">
             <div class="vslider">
@@ -56,6 +70,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </main>
 
