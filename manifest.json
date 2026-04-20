@@ -4,8 +4,8 @@
   "description": "Pick colors and build palettes",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#f5f5f5",
-  "theme_color": "#1a1a1a",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "icons": [
     {
       "src": "icon-192.png",
