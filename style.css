@@ -46,6 +46,7 @@ body {
 .palette-main {
   display: flex;
   align-items: flex-start;
+  gap: 10px;
 }
 
 /* ── Step controls ── */
@@ -75,7 +76,7 @@ body {
 
 #palette-labels {
   display: grid;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: 6ch 3ch 3ch 3ch;
   column-gap: 10px;
   font-family: ui-monospace, Consolas, monospace;
   font-size: 11px;
