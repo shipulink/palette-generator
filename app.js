@@ -96,9 +96,10 @@ function resetEndColors(r, g, b) {
 
 // ── Palette ──────────────────────────────────────────────
 
-let swatches   = [];
-let labelCells = [];
-let kebabDots  = null;
+let swatches      = [];
+let labelCells    = [];
+let kebabDots     = null;
+let paletteColors = [];
 
 function rebuildPalette() {
   paletteEl.innerHTML = '';
@@ -143,6 +144,7 @@ function rebuildPalette() {
 }
 
 function updatePalette(r, g, b) {
+  paletteColors = [];
   const count  = topCount + 1 + botCount;
   const mid    = topCount;
   const topRGB = hsvToRgb(topHSV.h, topHSV.s / 100, topHSV.v / 100);
@@ -161,6 +163,7 @@ function updatePalette(r, g, b) {
       cg = Math.round(g * (1 - t) + botRGB.g * t);
       cb = Math.round(b * (1 - t) + botRGB.b * t);
     }
+    paletteColors.push({ r: cr, g: cg, b: cb });
     swatches[i].style.background = `rgb(${cr},${cg},${cb})`;
 
     const cells = labelCells[i];
@@ -175,6 +178,20 @@ function updatePalette(r, g, b) {
     }
   }
 }
+
+// ── Export ────────────────────────────────────────────────
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const lines = ['JASC-PAL', '0100', String(paletteColors.length),
+    ...paletteColors.map(({ r, g, b }) => `${r} ${g} ${b}`)];
+  const blob = new Blob([lines.join('\n') + '\n'], { type: 'application/octet-stream' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'palette.pal';
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
 // ── Reset buttons ─────────────────────────────────────────
 

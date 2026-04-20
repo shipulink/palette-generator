@@ -205,6 +205,29 @@ body {
   letter-spacing: 0.05em;
 }
 
+/* ── Export button ── */
+
+#export-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 20px;
+  color: #e5e5e5;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 24px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+#export-btn:hover  { background: #1f2937; }
+#export-btn:active { background: #374151; }
+
 /* ── Modal ── */
 
 .modal {
