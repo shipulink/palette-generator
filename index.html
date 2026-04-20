@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="description" content="Pick colors and build palettes" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Palette Generator</title>
+  </head>
+  <body>
+    <main class="app">
+      <div class="pick-color-wrapper">
+        <button class="pick-color-btn" aria-label="Pick a color">
+          <svg class="plus-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="12" y1="4" x2="12" y2="20" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+          </svg>
+        </button>
+        <span class="caption">pick a color</span>
+      </div>
+    </main>
+    <script src="app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
+  </body>
+</html>
