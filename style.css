@@ -184,6 +184,21 @@ body {
   accent-color: #6366f1;
 }
 
+.reset-btn {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 16px;
+  padding: 5px;
+  cursor: pointer;
+  align-self: stretch;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.reset-btn:hover  { background: #1f2937; color: #e5e5e5; }
+.reset-btn:active { background: #374151; }
+
 .vslider label {
   font-size: 10px;
   color: #6b7280;

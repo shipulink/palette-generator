@@ -69,7 +69,7 @@ const MIN_MIX = 0.25;
 let topHSV = { h: 0, s: 0, v: 100 };
 let botHSV = { h: 0, s: 0, v: 0 };
 
-function resetEndColors(r, g, b) {
+function resetTopColor(r, g, b) {
   const tr = Math.round(r * MIN_MIX + 255 * (1 - MIN_MIX));
   const tg = Math.round(g * MIN_MIX + 255 * (1 - MIN_MIX));
   const tb = Math.round(b * MIN_MIX + 255 * (1 - MIN_MIX));
@@ -77,7 +77,9 @@ function resetEndColors(r, g, b) {
   topHSlider.value = topHSV.h;
   topSSlider.value = topHSV.s;
   topVSlider.value = topHSV.v;
+}
 
+function resetBotColor(r, g, b) {
   const br = Math.round(r * MIN_MIX);
   const bg = Math.round(g * MIN_MIX);
   const bb = Math.round(b * MIN_MIX);
@@ -85,6 +87,11 @@ function resetEndColors(r, g, b) {
   botHSlider.value = botHSV.h;
   botSSlider.value = botHSV.s;
   botVSlider.value = botHSV.v;
+}
+
+function resetEndColors(r, g, b) {
+  resetTopColor(r, g, b);
+  resetBotColor(r, g, b);
 }
 
 // ── Palette ──────────────────────────────────────────────
@@ -168,6 +175,18 @@ function updatePalette(r, g, b) {
     }
   }
 }
+
+// ── Reset buttons ─────────────────────────────────────────
+
+document.getElementById('top-reset').addEventListener('click', () => {
+  resetTopColor(currentBase.r, currentBase.g, currentBase.b);
+  updatePalette(currentBase.r, currentBase.g, currentBase.b);
+});
+
+document.getElementById('bot-reset').addEventListener('click', () => {
+  resetBotColor(currentBase.r, currentBase.g, currentBase.b);
+  updatePalette(currentBase.r, currentBase.g, currentBase.b);
+});
 
 // ── Step buttons ─────────────────────────────────────────
 
