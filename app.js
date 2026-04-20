@@ -10,11 +10,38 @@ const paletteEl = document.getElementById('palette');
 let colorPicker = null;
 let syncing = false;
 
+// ── Color utilities ──────────────────────────────────────
+
+function hsvToRgb(h, s, v) {
+  const i = Math.floor(h / 60) % 6;
+  const f = (h / 60) - Math.floor(h / 60);
+  const p = v * (1 - s);
+  const q = v * (1 - f * s);
+  const t = v * (1 - (1 - f) * s);
+  const r = [v, q, p, p, t, v][i];
+  const g = [t, v, v, q, p, p][i];
+  const b = [p, p, t, v, v, q][i];
+  return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function randomBaseColor() {
+  const h = Math.random() * 360;
+  const s = 0.55 + Math.random() * 0.45; // 55–100%: well saturated
+  const v = 0.4  + Math.random() * 0.45; // 40–85%:  not too dark or bright
+  return hsvToRgb(h, s, v);
+}
+
+const BASE = randomBaseColor();
+
 // ── Palette ──────────────────────────────────────────────
 
 const SWATCH_COUNT = 7;
 const MIDDLE = 3;
-const MIN_MIX = 0.1; // how close top/bottom get to white/black
+const MIN_MIX = 0.25; // how close top/bottom get to white/black
 
 let kebabDots = null;
 
@@ -61,7 +88,7 @@ function updatePalette(r, g, b) {
   }
 }
 
-updatePalette(255, 0, 0);
+updatePalette(BASE.r, BASE.g, BASE.b);
 
 // ── Modal ─────────────────────────────────────────────────
 
@@ -76,7 +103,7 @@ function initColorPicker() {
 
   colorPicker = new iro.ColorPicker('#color-wheel-container', {
     width,
-    color: '#ff0000',
+    color: rgbToHex(BASE.r, BASE.g, BASE.b),
     borderWidth: 1,
     borderColor: '#374151',
     layout: [
