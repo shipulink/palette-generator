@@ -16,10 +16,23 @@ const SWATCH_COUNT = 7;
 const MIDDLE = 3;
 const MIN_MIX = 0.1; // how close top/bottom get to white/black
 
+let kebabDots = null;
+
 const swatches = Array.from({ length: SWATCH_COUNT }, (_, i) => {
   const div = document.createElement('div');
   div.className = 'swatch' + (i === MIDDLE ? ' swatch-middle' : '');
-  if (i === MIDDLE) div.addEventListener('click', openModal);
+  if (i === MIDDLE) {
+    div.addEventListener('click', openModal);
+    kebabDots = document.createElement('div');
+    kebabDots.className = 'swatch-kebab';
+    kebabDots.innerHTML =
+      '<svg viewBox="0 0 20 4" xmlns="http://www.w3.org/2000/svg">' +
+      '<circle cx="2" cy="2" r="2"/>' +
+      '<circle cx="10" cy="2" r="2"/>' +
+      '<circle cx="18" cy="2" r="2"/>' +
+      '</svg>';
+    div.appendChild(kebabDots);
+  }
   paletteEl.appendChild(div);
   return div;
 });
@@ -41,6 +54,10 @@ function updatePalette(r, g, b) {
       cb = Math.round(b * t);
     }
     swatches[i].style.background = `rgb(${cr},${cg},${cb})`;
+    if (i === MIDDLE && kebabDots) {
+      const luma = (0.299 * cr + 0.587 * cg + 0.114 * cb) / 255;
+      kebabDots.querySelector('svg').style.fill = luma > 0.45 ? '#000' : '#fff';
+    }
   }
 }
 
