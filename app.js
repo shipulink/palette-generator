@@ -1,14 +1,52 @@
-const btn = document.querySelector('.pick-color-btn');
-const colorPreview = document.getElementById('color-preview');
 const modal = document.getElementById('modal');
 const backdrop = document.getElementById('modal-backdrop');
+const colorPreview = document.getElementById('color-preview');
 const hexInput = document.getElementById('hex-input');
 const rInput = document.getElementById('r-input');
 const gInput = document.getElementById('g-input');
 const bInput = document.getElementById('b-input');
+const paletteEl = document.getElementById('palette');
 
 let colorPicker = null;
 let syncing = false;
+
+// ── Palette ──────────────────────────────────────────────
+
+const SWATCH_COUNT = 7;
+const MIDDLE = 3;
+const MIN_MIX = 0.1; // how close top/bottom get to white/black
+
+const swatches = Array.from({ length: SWATCH_COUNT }, (_, i) => {
+  const div = document.createElement('div');
+  div.className = 'swatch' + (i === MIDDLE ? ' swatch-middle' : '');
+  if (i === MIDDLE) div.addEventListener('click', openModal);
+  paletteEl.appendChild(div);
+  return div;
+});
+
+function updatePalette(r, g, b) {
+  for (let i = 0; i < SWATCH_COUNT; i++) {
+    let cr, cg, cb;
+    if (i <= MIDDLE) {
+      // Tint: blend toward white
+      const t = MIN_MIX + (1 - MIN_MIX) * (i / MIDDLE);
+      cr = Math.round(r * t + 255 * (1 - t));
+      cg = Math.round(g * t + 255 * (1 - t));
+      cb = Math.round(b * t + 255 * (1 - t));
+    } else {
+      // Shade: blend toward black
+      const t = 1 - (1 - MIN_MIX) * ((i - MIDDLE) / (SWATCH_COUNT - 1 - MIDDLE));
+      cr = Math.round(r * t);
+      cg = Math.round(g * t);
+      cb = Math.round(b * t);
+    }
+    swatches[i].style.background = `rgb(${cr},${cg},${cb})`;
+  }
+}
+
+updatePalette(255, 0, 0);
+
+// ── Modal ─────────────────────────────────────────────────
 
 function clamp(val, min, max) {
   return Math.max(min, Math.min(max, val));
@@ -39,11 +77,12 @@ function initColorPicker() {
     rInput.value = color.rgb.r;
     gInput.value = color.rgb.g;
     bInput.value = color.rgb.b;
+    updatePalette(color.rgb.r, color.rgb.g, color.rgb.b);
     syncing = false;
   });
 
-  // Populate inputs with initial color
   const c = colorPicker.color;
+  colorPreview.style.background = c.hexString;
   hexInput.value = c.hexString.slice(1).toUpperCase();
   rInput.value = c.rgb.r;
   gInput.value = c.rgb.g;
@@ -59,10 +98,10 @@ function closeModal() {
   modal.classList.add('hidden');
 }
 
-btn.addEventListener('click', openModal);
 backdrop.addEventListener('click', closeModal);
 
-// Hex input — strip non-hex chars, sync when 6 chars complete
+// ── Hex input ─────────────────────────────────────────────
+
 hexInput.addEventListener('input', () => {
   const raw = hexInput.value;
   const clean = raw.replace(/[^0-9a-fA-F]/g, '').toUpperCase();
@@ -74,11 +113,13 @@ hexInput.addEventListener('input', () => {
     rInput.value = colorPicker.color.rgb.r;
     gInput.value = colorPicker.color.rgb.g;
     bInput.value = colorPicker.color.rgb.b;
+    updatePalette(colorPicker.color.rgb.r, colorPicker.color.rgb.g, colorPicker.color.rgb.b);
     syncing = false;
   }
 });
 
-// RGB inputs — digits only, cap at 255, sync on every keystroke
+// ── RGB inputs ────────────────────────────────────────────
+
 function syncFromRGB() {
   if (syncing || !colorPicker) return;
   const r = clamp(parseInt(rInput.value) || 0, 0, 255);
@@ -88,6 +129,7 @@ function syncFromRGB() {
   colorPicker.color.rgb = { r, g, b };
   colorPreview.style.background = colorPicker.color.hexString;
   hexInput.value = colorPicker.color.hexString.slice(1).toUpperCase();
+  updatePalette(r, g, b);
   syncing = false;
 }
 
@@ -99,7 +141,6 @@ function syncFromRGB() {
     syncFromRGB();
   });
 
-  // Clamp and fill empty field on blur
   input.addEventListener('blur', () => {
     const val = clamp(parseInt(input.value) || 0, 0, 255);
     input.value = val;
