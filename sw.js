@@ -1,4 +1,4 @@
-const CACHE = 'palette-v1';
+const CACHE = 'palette-v2';
 const ASSETS = [
   '.', 'index.html', 'style.css', 'app.js', 'manifest.json',
   'https://cdn.jsdelivr.net/npm/@jaames/iro@5/dist/iro.min.js',
