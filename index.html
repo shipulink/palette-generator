@@ -21,6 +21,38 @@
         <span class="caption">pick a color</span>
       </div>
     </main>
+
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Color picker">
+      <div class="modal-backdrop" id="modal-backdrop"></div>
+      <div class="modal-card">
+        <div id="color-preview"></div>
+        <div id="color-wheel-container"></div>
+        <div class="color-inputs">
+          <div class="hex-row">
+            <span class="input-prefix">#</span>
+            <input id="hex-input" type="text" inputmode="text"
+              maxlength="6" placeholder="rrggbb"
+              autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="rgb-row">
+            <div class="rgb-field">
+              <label for="r-input">R</label>
+              <input id="r-input" type="text" inputmode="numeric" maxlength="3" />
+            </div>
+            <div class="rgb-field">
+              <label for="g-input">G</label>
+              <input id="g-input" type="text" inputmode="numeric" maxlength="3" />
+            </div>
+            <div class="rgb-field">
+              <label for="b-input">B</label>
+              <input id="b-input" type="text" inputmode="numeric" maxlength="3" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5/dist/iro.min.js"></script>
     <script src="app.js"></script>
     <script>
       if ('serviceWorker' in navigator) {

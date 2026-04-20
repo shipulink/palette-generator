@@ -1,5 +1,8 @@
 const CACHE = 'palette-v1';
-const ASSETS = ['.', 'index.html', 'style.css', 'app.js', 'manifest.json'];
+const ASSETS = [
+  '.', 'index.html', 'style.css', 'app.js', 'manifest.json',
+  'https://cdn.jsdelivr.net/npm/@jaames/iro@5/dist/iro.min.js',
+];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));

@@ -16,6 +16,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Main screen ── */
+
 .app {
   min-height: 100dvh;
   display: flex;
@@ -69,4 +71,124 @@ body {
   font-size: 14px;
   color: #9ca3af;
   letter-spacing: 0.03em;
+}
+
+/* ── Modal ── */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.modal-card {
+  position: relative;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: calc(100vw - 48px);
+  max-width: 320px;
+}
+
+/* ── Color preview ── */
+
+#color-preview {
+  width: 100%;
+  height: 64px;
+  border-radius: 10px;
+  background: #ff0000;
+}
+
+/* ── Color inputs ── */
+
+.color-inputs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hex-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0a0a0a;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 0 12px;
+}
+
+.hex-row:focus-within {
+  box-shadow: 0 0 0 2px #6366f1;
+}
+
+.input-prefix {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.hex-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e5e5e5;
+  font-family: inherit;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  padding: 10px 0;
+}
+
+.rgb-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.rgb-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rgb-field label {
+  font-size: 11px;
+  color: #6b7280;
+  letter-spacing: 0.05em;
+}
+
+.rgb-field input {
+  width: 100%;
+  background: #0a0a0a;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  outline: none;
+  color: #e5e5e5;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 4px;
+  text-align: center;
+}
+
+.rgb-field input:focus {
+  box-shadow: 0 0 0 2px #6366f1;
 }
